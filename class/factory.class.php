@@ -349,10 +349,11 @@ class Factory extends CommonObject
 	 *  @param		double	$price			sell price
 	 *  @param		int		$qtyglobal		Quantity is a global value
 	 *  @param		string	$description	description
-	 *  @param		int		$qtyglobal		order of composition
+	 *  @param		int		$ordercomponent	order of composition
+	 *  @param		int		$fk_entrepot	Warehouse linked to this component
 	 *  @return	 int						< 0 if KO, > 0 if OK
 	 */
-	function add_component($fk_parent, $fk_child, $qty, $pmp=0, $price=0, $qtyglobal=0, $description='', $ordercomponent=0)
+	function add_component($fk_parent, $fk_child, $qty, $pmp=0, $price=0, $qtyglobal=0, $description='', $ordercomponent=0, $fk_entrepot=0)
 	{
 		$sql = 'DELETE from '.MAIN_DB_PREFIX.'product_factory';
 		$sql .= ' WHERE fk_product_father  = "'.$fk_parent.'" AND fk_product_children = "'.$fk_child.'"';
@@ -362,10 +363,11 @@ class Factory extends CommonObject
 			return -1;
 		} else {
 			$sql = 'INSERT INTO '.MAIN_DB_PREFIX.'product_factory(fk_product_father, fk_product_children,';
-			$sql .= 'qty, pmp, price, globalqty, description, ordercomponent)';
+			$sql .= 'qty, pmp, price, globalqty, description, ordercomponent, fk_entrepot)';
 			$sql .= ' VALUES ('.$fk_parent.', '.$fk_child.', '.price2num($qty).', '.price2num($pmp).', '.price2num($price);
 			$sql .= ', '.($qtyglobal?$qtyglobal:'0').', "'.$this->db->escape($description).'"';
 			$sql .= ', '.($ordercomponent?$ordercomponent:'0');
+			$sql .= ', '.($fk_entrepot ? $fk_entrepot : 'null');
 			$sql .= ' )';
 			//print $sql.'<br>';
 			if (! $this->db->query($sql)) {
@@ -462,7 +464,7 @@ class Factory extends CommonObject
 	 */
 	function is_sousproduit($fk_parent, $fk_child)
 	{
-		$sql = "SELECT qty, globalqty, description, ordercomponent";
+		$sql = "SELECT qty, globalqty, description, ordercomponent, fk_entrepot";
 		$sql.= " FROM ".MAIN_DB_PREFIX."product_factory";
 		$sql.= " WHERE fk_product_father  = '".$fk_parent."'";
 		$sql.= " AND fk_product_children = '".$fk_child."'";
@@ -477,6 +479,7 @@ class Factory extends CommonObject
 				$this->is_sousproduit_qtyglobal = $obj->globalqty;
 				$this->is_sousproduit_description = $obj->description;
 				$this->is_sousproduit_ordercomponent = $obj->ordercomponent;
+  				$this->is_sousproduit_fk_entrepot = $obj->fk_entrepot;
 				return true;
 			} else
 				return false;
@@ -764,6 +767,7 @@ class Factory extends CommonObject
 				$globalqty=(! empty($desc_pere[6]) ? $desc_pere[6] :'0');
 				$description=(! empty($desc_pere[7]) ? $desc_pere[7] :'');
 				$ordercomponent=(! empty($desc_pere[8]) ? $desc_pere[8] :'');
+				$fk_entrepot=(! empty($desc_pere['fk_entrepot']) ? $desc_pere['fk_entrepot'] :'');
 
 				if ($multiply) {
 					//print "XXX ".$desc_pere[1]." nb=".$nb." multiply=".$multiply."<br>";
@@ -792,7 +796,8 @@ class Factory extends CommonObject
 						'type'=>$type,								// Nb of units that compose parent product
 						'globalqty'=>$globalqty,					// Nb of units that compose parent product
 						'description'=>$description,				// description additionnel sur l'of
-						'ordercomponent'=>$ordercomponent			// ordre de la composition
+						'ordercomponent'=>$ordercomponent,			// ordre de la composition
+						'fk_entrepot'=>$fk_entrepot				// warehouse for this component
 					);
 				} else {
 					$product->fetch($desc_pere[0]);
@@ -810,7 +815,8 @@ class Factory extends CommonObject
 						'type'=>$type,								// Nb of units that compose parent product
 						'globalqty'=>$globalqty,					// Nb of units that compose parent product
 						'description'=>$description,				// description additionnel sur l'of
-						'ordercomponent'=>$ordercomponent			// ordre de la composition
+						'ordercomponent'=>$ordercomponent,			// ordre de la composition
+						'fk_entrepot'=>$fk_entrepot				// warehouse for this component
 					);
 				}
 			} elseif ($nom_pere != "0" && $nom_pere != "1")
@@ -1334,7 +1340,7 @@ class Factory extends CommonObject
 		if ($fk_parent > 0) {
 			$sql = "SELECT p.rowid, p.label as label, p.fk_product_type,";
 			$sql.= " pf.qty as qty, pf.pmp as pmp, pf.price as price, pf.fk_product_children as id,";
-			$sql.= " pf.globalqty as globalqty, pf.description as description, pf.ordercomponent";
+			$sql.= " pf.globalqty as globalqty, pf.description as description, pf.ordercomponent, pf.fk_entrepot";
 			$sql.= " FROM ".MAIN_DB_PREFIX."product as p";
 			$sql.= ", ".MAIN_DB_PREFIX."product_factory as pf";
 			$sql.= " WHERE p.rowid = pf.fk_product_children";
@@ -1364,7 +1370,8 @@ class Factory extends CommonObject
 								6=>$rec['globalqty'],
 								7=>$rec['description'],
 								8=>$rec['ordercomponent'],
-								9=>array()			// pour stocker les enfants sans fiche le basard
+								9=>array(),			// pour stocker les enfants sans fiche le basard
+								'fk_entrepot'=>($fk_parent > 0 ? $rec['fk_entrepot'] : '')
 							);
 				$listofchilds=$this->getChildsArbo($rec['id'], 0, $maxlevel++);
 				foreach ($listofchilds as $keyChild => $valueChild)

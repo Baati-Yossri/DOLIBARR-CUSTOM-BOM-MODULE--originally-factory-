@@ -38,6 +38,7 @@ require_once DOL_DOCUMENT_ROOT."/core/lib/product.lib.php";
 require_once DOL_DOCUMENT_ROOT."/product/class/product.class.php";
 require_once DOL_DOCUMENT_ROOT."/product/stock/class/entrepot.class.php";
 require_once DOL_DOCUMENT_ROOT."/categories/class/categorie.class.php";
+require_once DOL_DOCUMENT_ROOT."/product/class/html.formproduct.class.php";
 
 
 dol_include_once('/factory/class/factory.class.php');
@@ -88,7 +89,8 @@ if ( $action == 'add_prod' && $cancel <> $langs->trans("Cancel")
 			if ($factory->add_component(
 							$id, $_POST["prod_id_".$i], $_POST["prod_qty_".$i], 
 							0, 0, $_POST["prod_id_globalchk".$i], 
-							$_POST["descComposant".$i], $_POST["prod_order_".$i]
+							$_POST["descComposant".$i], $_POST["prod_order_".$i],
+							$_POST["prod_entrepot_".$i]
 			) > 0)
 				$action = 'edit';
 			else {
@@ -207,6 +209,7 @@ if ($action == 'search') {
 
 $productstatic = new Product($db);
 $form = new Form($db);
+$formproduct = new FormProduct($db);
 
 llxHeader("", "", $langs->trans("CardProduct".$product->type));
 
@@ -428,6 +431,7 @@ if ($id || $ref) {
 				print '<th class="liste_titre" width=100px align="right">'.$langs->trans("FactorySellingPriceHT").'</th>';
 				print '<th class="liste_titre" width=100px align="right">'.$langs->trans("ProfitAmount").'</th>';
 	
+								print '<th class="liste_titre" width=100px align="center">'.$langs->trans("Warehouse").'</th>';
 				print '</tr>';
 				$mntTot=0;
 				$pmpTot=0;
@@ -492,6 +496,13 @@ if ($id || $ref) {
 					print '<td align="right">'.price($price*$value['nb']).'</td>';
 					print '<td align="right">'.price(($price-$pmp)*$value['nb']).'</td>'; 
 					
+										if (! empty($value['fk_entrepot'])) {
+						$entrepot = new Entrepot($db);
+						$entrepot->fetch($value['fk_entrepot']);
+						print '<td align="center">'.$entrepot->ref.'</td>';
+					} else {
+						print '<td align="center"></td>';
+					}
 					$mntTot=$mntTot+$price*$value['nb'];
 					$pmpTot=$pmpTot+$pmp*$value['nb']; // sub total calculation
 					
@@ -511,6 +522,7 @@ if ($id || $ref) {
 				print '<td ></td>';
 				print '<td align="right" >'.price($mntTot).'</td>';
 				print '<td align="right" >'.price($mntTot-$pmpTot).'</td>';
+								print '<td></td>';
 				print '</tr>';
 				print '</table>';
 			}
@@ -668,6 +680,7 @@ if ($id || $ref) {
 				print '<th class="liste_titre" align="right">'.$langs->trans("Quantity").'</th>';
 				print '<th class="liste_titre" align="center">'.$langs->trans("AddDel").'</th>';
 				print '<th class="liste_titre" align="right">'.$langs->trans("Global").'</th>';
+								print '<th class="liste_titre" align="center">'.$langs->trans("Warehouse").'</th>';
 				print '</tr>';
 
 				if ($resqlsearch) {
@@ -704,12 +717,14 @@ if ($id || $ref) {
 							$descComposant=$factory->is_sousproduit_description;
 							$ordercomponent=$factory->is_sousproduit_ordercomponent;
 							$qtyglobal=$factory->is_sousproduit_qtyglobal;
+							$fk_entrepot=$factory->is_sousproduit_fk_entrepot;
 						} else {
 							$addchecked = '';
 							$descComposant = $objp->addinforecup;
 							$qty="1";
 							$ordercomponent="0"; // par défaut pas d'ordre
 							$qtyglobal=0;
+							$fk_entrepot=0;
 						}
 						print '<td align="right">'.price($objp->pmp).'</td>';
 						print '<td align="right">'.price($objp->price).'</td>';
@@ -750,6 +765,8 @@ if ($id || $ref) {
 						print '<td align=right>';
 
 						print $form->selectyesno('prod_id_globalchk'.$i, $qtyglobal, 1);
+						print '</td><td align="center">';
+						print $formproduct->selectWarehouses($fk_entrepot, 'prod_entrepot_'.$i, '', 1);
 						print '</td></tr>';
 
 						if ($bc[$var]=='class="pair"')
