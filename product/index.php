@@ -573,7 +573,11 @@ if ($id || $ref) {
 							if ($value['fk_product_type']==0) {
 								// if product
 								$productstatic->load_stock();
-								print '<td align=center>'.$factory->getUrlStock($value['id'], 1, $productstatic->stock_reel).'</td>';
+								$qty_stock = $productstatic->stock_reel;
+								if (!empty($value['fk_entrepot'])) {
+									$qty_stock = isset($productstatic->stock_warehouse[$value['fk_entrepot']]) ? $productstatic->stock_warehouse[$value['fk_entrepot']]->real : 0;
+								}
+								print '<td align=center>'.$factory->getUrlStock($value['id'], 1, $qty_stock).'</td>';
 								$nbcmde=0;
 								// on regarde si il n'y pas de commande fournisseur en cours
 								$sql = 'SELECT DISTINCT sum(cofd.qty) as nbCmdFourn';
