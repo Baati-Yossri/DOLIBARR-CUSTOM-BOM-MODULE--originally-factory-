@@ -625,11 +625,11 @@ if ($id || $ref) {
 						if ($canedit) {
 							if ($editmode) {
 								print '<input type="hidden" name="lineid" value="'.$value['id'].'">';
-								print '<button type="submit" name="action" value="saveline" class="button" style="padding: 2px 5px; margin-right: 5px;" title="'.$langs->trans("Save").'">'.img_picto('', 'check').'</button>';
-								print '<a href="'.$_SERVER["PHP_SELF"].'?id='.$id.'" class="button" style="padding: 3px 6px;" title="'.$langs->trans("Cancel").'">'.img_picto('', 'close').'</a>';
+								print '<button type="submit" name="action" value="saveline" style="border: none; background: transparent; padding: 0; margin-right: 12px; cursor: pointer; transform: scale(1.3);" title="'.$langs->trans("Save").'">'.img_picto('', 'check').'</button>';
+								print '<a href="'.$_SERVER["PHP_SELF"].'?id='.$id.'" style="transform: scale(1.3); display: inline-block;" title="'.$langs->trans("Cancel").'">'.img_picto('', 'close').'</a>';
 							} else {
-								print '<a href="'.$_SERVER["PHP_SELF"].'?id='.$id.'&action=editline&lineid='.$value['id'].'#line_'.$value['id'].'" style="margin-right: 8px;" title="'.$langs->trans("Edit").'">'.img_picto('', 'edit').'</a>';
-								print '<a href="'.$_SERVER["PHP_SELF"].'?id='.$id.'&action=ask_delete_component&lineid='.$value['id'].'" title="'.$langs->trans("Delete").'">'.img_picto('', 'delete').'</a>';
+								print '<a href="'.$_SERVER["PHP_SELF"].'?id='.$id.'&action=editline&lineid='.$value['id'].'#line_'.$value['id'].'" style="margin-right: 12px; transform: scale(1.3); display: inline-block;" title="'.$langs->trans("Edit").'">'.img_picto('', 'edit').'</a>';
+								print '<a href="'.$_SERVER["PHP_SELF"].'?id='.$id.'&action=ask_delete_component&lineid='.$value['id'].'" style="transform: scale(1.3); display: inline-block;" title="'.$langs->trans("Delete").'">'.img_picto('', 'delete').'</a>';
 							}
 						}
 						print '</td>';
