@@ -58,11 +58,11 @@ function factory_product_prepare_head($object, $user=0)
 	$h = 0;
 	$head = array();
 
-	$head[$h][0] = dol_buildpath("/factory/product/index.php?id=".$object->id, 1);
+	$head[$h][0] = dol_buildpath("/custom/factory/product/index.php?id=".$object->id, 1);
 	$head[$h][1] = $langs->trans("Composition");
 	$head[$h][2] = 'composition';
 	$h++;
-	$head[$h][0] = dol_buildpath("/factory/product/direct.php?id=".$object->id, 1);
+	$head[$h][0] = dol_buildpath("/custom/factory/product/direct.php?id=".$object->id, 1);
 	$head[$h][1] = $langs->trans("DirectBuild");
 	$head[$h][2] = 'directbuild';
 	$h++;
@@ -135,7 +135,7 @@ function select_entrepot_list($selected='', $htmlname='entrepotid', $showempty=0
 			}
 			$res.='</select>';
 		} else {
-			// si pas de liste, on positionne un hidden à vide
+			// si pas de liste, on positionne un hidden Ã  vide
 			$res.='<input type="hidden" name="'.$htmlname.'" value=-1>';
 		}
 	}
