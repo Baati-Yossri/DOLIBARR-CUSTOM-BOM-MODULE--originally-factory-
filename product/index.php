@@ -648,7 +648,7 @@ if ($id || $ref) {
 					print '<tr class="liste_titre_add" style="background-color: #f8f9fa; border-top: 2px solid #dee2e6;">';
 					print '<td></td>';
 					print '<td colspan="2" align="left">';
-					print $form->select_produits('', 'add_fk_product', '', 0, 0, 1, 2, '', 0, array(), 0, '1');
+					print $form->select_produits('', 'add_fk_product', '', 0, 0, '', 2, '', 0, array(), 0, '1');
 					print '</td>';
 					print '<td align="center">';
 					print '<input type="text" name="add_qty" size="4" value="1">';
