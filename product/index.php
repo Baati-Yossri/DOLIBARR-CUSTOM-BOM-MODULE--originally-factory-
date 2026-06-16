@@ -160,6 +160,7 @@ if ($action == 'saveline' && ($user->rights->produit->creer || $user->rights->se
 }
 
 // add sub-product to a product
+if (false) { // Disabled legacy add_prod
 if ( $action == 'add_prod' && $cancel <> $langs->trans("Cancel") 
 	&& ($user->rights->produit->creer || $user->rights->service->creer)) {
 	$error=0;
@@ -196,6 +197,7 @@ if ( $action == 'add_prod' && $cancel <> $langs->trans("Cancel")
 		exit;
 	}
 }
+} // End disabled legacy add_prod
 if ($cancel == $langs->trans("Cancel")) {
 	$action = '';
 	Header("Location: index.php?id=".$_POST["id"]);
@@ -784,6 +786,7 @@ if ($id || $ref) {
 
 		$rowspan=1;
 		if ($conf->categorie->enabled) $rowspan++;
+if (false) { // Disabled legacy search form
 		if ($action == 'edit' || $action == 'search' || $action == 're-edit' ) {
 			print '<br>';
 			print_fiche_titre($langs->trans("ProductToAddSearch"), '', '');
@@ -953,6 +956,7 @@ if ($id || $ref) {
 		}
 	}
 }
+} // End disabled legacy search form
 
 /* Barre d'action			*/
 print '<div class="tabsAction">';
@@ -962,8 +966,10 @@ if ($action == '' && $bproduit) {
 	if ($user->rights->factory->creer) {
 		//Le stock doit être actif et le produit ne doit pas être à l'achat
 		if ($conf->stock->enabled && $object->finished == '1') {
+if (false) { // Disabled legacy edit button
 			print '<a class="butAction" href="index.php?action=edit&amp;id='.$productid.'">';
 			print $langs->trans("EditComponent").'</a>';
+} // End disabled legacy edit button
 			print '<a class="butAction" href="index.php?action=importexport&id='.$productid.'">';
 			print $langs->trans("ImportExportComposition").'</a>';
 

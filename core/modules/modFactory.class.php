@@ -22,7 +22,7 @@
  *	\ingroup	factory
  *	\brief	  Fichier de description et activation du module factory
  */
-include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
+include_once DOL_DOCUMENT_ROOT . '/core/modules/DolibarrModules.class.php';
 
 
 /**
@@ -54,12 +54,12 @@ class modfactory extends DolibarrModules
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
 		$this->version = $this->getLocalVersion();
 
-		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
+		$this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
 		$this->special = 0;
-		$this->picto=$this->name.'@'.$this->name;
+		$this->picto = $this->name . '@' . $this->name;
 
 		// Data directories to create when module is enabled
-		$this->dirs = array("/".$this->name."/temp");
+		$this->dirs = array("/" . $this->name . "/temp");
 
 		// Constantes
 		$this->const = array();
@@ -67,7 +67,7 @@ class modfactory extends DolibarrModules
 		// Dependancies
 		$this->depends = array();
 		$this->requiredby = array();
-		$this->config_page_url = array($this->name.".php@".$this->name);
+		$this->config_page_url = array($this->name . ".php@" . $this->name);
 		$this->langfiles = array("propal", "order", "project", "companies", "products", "factory@factory");
 
 		$this->need_dolibarr_version = array(3, 4);
@@ -78,15 +78,15 @@ class modfactory extends DolibarrModules
 
 		// Constants
 		$this->const = array();
-		$r=0;
+		$r = 0;
 
 		// contact element setting
-		$this->contactelement=1;
+		$this->contactelement = 1;
 
 		// Permissions
 		$this->rights = array();
 		$this->rights_class = $this->name;
-		$r=0;
+		$r = 0;
 
 		$r++;
 		$this->rights[$r][0] = 160310; // id de la permission
@@ -107,23 +107,30 @@ class modfactory extends DolibarrModules
 		$this->rights[$r][3] = 1; // La permission est-elle une permission par defaut
 		$this->rights[$r][4] = 'annuler';
 
-		
-		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=products,fk_leftmenu=factory',
-					'type'=>'left',
-					'titre'=>'Declinaison',
-					'mainmenu'=>'', 'leftmenu'=>'',
-					'url'=>'/factory/declinaison.php',
-					'langs'=>'factory@factory',
-					'position'=>110, 'enabled'=>'1',
-					'perms'=>'1', 'target'=>'',
-					'user'=>2);
+
+		$this->menu[$r] = array(
+			'fk_menu' => 'fk_mainmenu=products,fk_leftmenu=factory',
+			'type' => 'left',
+			'titre' => 'Declinaison',
+			'mainmenu' => '',
+			'leftmenu' => '',
+			'url' => '/factory/declinaison.php',
+			'langs' => 'factory@factory',
+			'position' => 110,
+			'enabled' => '1',
+			'perms' => '1',
+			'target' => '',
+			'user' => 2
+		);
 		$r++;
 
-					
+
 		// additional tabs
 		$this->tabs = array(
-    'product:+factory:Factory:@Produit:/custom/factory/product/index.php?id=__ID__'
-);
+			'product:+factory:Factory:@Produit:/custom/factory/product/index.php?id=__ID__'
+
+
+		);
 
 	}
 
@@ -136,7 +143,7 @@ class modfactory extends DolibarrModules
 	 *	  @param	  string	$options	Options when enabling module ('', 'noboxes')
 	 *	  @return	 int			 	1 if OK, 0 if KO
 	 */
-	function init($options='')
+	function init($options = '')
 	{
 		global $conf;
 
@@ -144,8 +151,8 @@ class modfactory extends DolibarrModules
 		$this->remove($options);
 
 		$sql = array();
-		
-		$result=$this->load_tables();
+
+		$result = $this->load_tables();
 
 		return $this->_init($sql, $options);
 	}
@@ -158,12 +165,12 @@ class modfactory extends DolibarrModules
 	 *	  @param	  string	$options	Options when enabling module ('', 'noboxes')
 	 *	  @return	 int			 	1 if OK, 0 if KO
 	 */
-	function remove($options='')
+	function remove($options = '')
 	{
 		$sql = array();
 		return $this->_remove($sql, $options);
 	}
-	
+
 	/**
 	 *		Create tables, keys and data required by module
 	 * 		Files llx_table1.sql, llx_table1.key.sql llx_data.sql with create table, create keys
@@ -180,7 +187,7 @@ class modfactory extends DolibarrModules
 	function getChangeLog()
 	{
 		// Libraries
-		dol_include_once("/".$this->name."/core/lib/patasmonkey.lib.php");
+		dol_include_once("/" . $this->name . "/core/lib/patasmonkey.lib.php");
 		return getChangeLog($this->name);
 	}
 
@@ -193,15 +200,16 @@ class modfactory extends DolibarrModules
 			return $currentversion;
 
 		if ($this->disabled) {
-			$newversion= $langs->trans("DolibarrMinVersionRequiered")." : ".$this->dolibarrminversion;
-			$currentversion="<font color=red><b>".img_error($newversion).$currentversion."</b></font>";
+			$newversion = $langs->trans("DolibarrMinVersionRequiered") . " : " . $this->dolibarrminversion;
+			$currentversion = "<font color=red><b>" . img_error($newversion) . $currentversion . "</b></font>";
 			return $currentversion;
 		}
 
-		$context  = stream_context_create(array('http' => array('header' => 'Accept: application/xml')));
+		$context = stream_context_create(array('http' => array('header' => 'Accept: application/xml')));
 		$changelog = @file_get_contents(
-						str_replace("www", "dlbdemo", $this->editor_web).'/htdocs/custom/'.$this->name.'/changelog.xml',
-						false, $context
+			str_replace("www", "dlbdemo", $this->editor_web) . '/htdocs/custom/' . $this->name . '/changelog.xml',
+			false,
+			$context
 		);
 		//$htmlversion = @file_get_contents($this->editor_web.$this->editor_version_folder.$this->name.'/');
 
@@ -212,16 +220,16 @@ class modfactory extends DolibarrModules
 			if ($sxelast === false)
 				return $currentversion;
 			else
-				$tblversionslast=$sxelast->Version;
+				$tblversionslast = $sxelast->Version;
 
-			$lastversion = $tblversionslast[count($tblversionslast)-1]->attributes()->Number;
+			$lastversion = $tblversionslast[count($tblversionslast) - 1]->attributes()->Number;
 
 			if ($lastversion != (string) $this->version) {
 				if ($lastversion > (string) $this->version) {
-					$newversion= $langs->trans("NewVersionAviable")." : ".$lastversion;
-					$currentversion="<font title='".$newversion."' color=orange><b>".$currentversion."</b></font>";
+					$newversion = $langs->trans("NewVersionAviable") . " : " . $lastversion;
+					$currentversion = "<font title='" . $newversion . "' color=orange><b>" . $currentversion . "</b></font>";
 				} else
-					$currentversion="<font title='Version Pilote' color=red><b>".$currentversion."</b></font>";
+					$currentversion = "<font title='Version Pilote' color=red><b>" . $currentversion . "</b></font>";
 			}
 		}
 		return $currentversion;
@@ -230,18 +238,18 @@ class modfactory extends DolibarrModules
 	function getLocalVersion()
 	{
 		global $langs;
-		$context  = stream_context_create(array('http' => array('header' => 'Accept: application/xml')));
-		$changelog = @file_get_contents(dol_buildpath($this->name, 0).'/changelog.xml', false, $context);
+		$context = stream_context_create(array('http' => array('header' => 'Accept: application/xml')));
+		$changelog = @file_get_contents(dol_buildpath($this->name, 0) . '/changelog.xml', false, $context);
 		$sxelast = simplexml_load_string(nl2br($changelog));
-		if ($sxelast === false) 
+		if ($sxelast === false)
 			return $langs->trans("ChangelogXMLError");
 		else {
-			$tblversionslast=$sxelast->Version;
-			$currentversion = $tblversionslast[count($tblversionslast)-1]->attributes()->Number;
-			$tblDolibarr=$sxelast->Dolibarr;
-			$minversionDolibarr=$tblDolibarr->attributes()->minVersion;
+			$tblversionslast = $sxelast->Version;
+			$currentversion = $tblversionslast[count($tblversionslast) - 1]->attributes()->Number;
+			$tblDolibarr = $sxelast->Dolibarr;
+			$minversionDolibarr = $tblDolibarr->attributes()->minVersion;
 			if ((int) DOL_VERSION < (int) $minversionDolibarr) {
-				$this->dolibarrminversion=$minversionDolibarr;
+				$this->dolibarrminversion = $minversionDolibarr;
 				$this->disabled = true;
 			}
 		}
