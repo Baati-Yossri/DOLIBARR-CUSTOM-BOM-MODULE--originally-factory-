@@ -972,9 +972,8 @@ class Factory extends CommonObject
 
 	function getExportComposition($tblCompositionLine)
 	{
-		$tmp.="<?xml version='1.0' encoding='ISO-8859-1'?>\n";
+		$tmp="<?xml version='1.0' encoding='ISO-8859-1'?>\n";
 		$tmp.="<FactoryComposition>\n";
-		// récupération des champs associés au customtabs
 		$tmp.="<FactoryCompositionLines>\n";
 		foreach ($tblCompositionLine as $key => $value) {
 			$tmp.="\t".'<FactoryCompositionLine>'."\n";
@@ -985,6 +984,7 @@ class Factory extends CommonObject
 			$tmp.="\t \t<globalqty>".$value['globalqty']."</globalqty>\n";
 			$tmp.="\t \t<description>".$value['description']."</description>\n";
 			$tmp.="\t \t<ordercomponent>".$value['ordercomponent']."</ordercomponent>\n";
+			$tmp.="\t \t<fk_entrepot>".$value['fk_entrepot']."</fk_entrepot>\n";
 			$tmp.="\t".'</FactoryCompositionLine>'."\n";
 		}
 		$tmp.="</FactoryCompositionLines>\n";
@@ -998,11 +998,12 @@ class Factory extends CommonObject
 		libxml_use_internal_errors(true);
 		$sxe = simplexml_load_string($xml);
 		if ($sxe === false) {
-			echo "Erreur lors du chargement du XML\n";
-			foreach (libxml_get_errors() as $error) {
-				echo "\t", $error->message;
-			}
-		}
+  			echo "Erreur lors du chargement du XML\n";
+  			foreach (libxml_get_errors() as $error) {
+  				echo "\t", $error->message;
+  			}
+			return -1;
+  		}
 		else
 			$arraydata = json_decode(json_encode($sxe), TRUE);
 		
@@ -1010,15 +1011,22 @@ class Factory extends CommonObject
 		$this->del_component($this->id);
 		$tblfields=$arraydata['FactoryCompositionLines'];
 		$tblfields=$tblfields['FactoryCompositionLine'];
+		
+		if (isset($tblfields['productid'])) { $tblfields = array($tblfields); } // Fix single-element array flattening
 
 		foreach ($tblfields as $fields) {
+			// Prevent array conversion errors from empty XML tags
+			foreach($fields as $k => $v) {
+				if (is_array($v)) $fields[$k] = "";
+			}
 			$this->add_component($this->id, $fields['productid'],
 							$fields['nb'], 
 							$fields['pmp'], 
 							$fields['price'], 
 							$fields['globalqty'], 
 							$fields['description'],
-							$fields['ordercomponent']
+							$fields['ordercomponent'],
+							$fields['fk_entrepot']
 			);
 		}
 
@@ -1069,11 +1077,12 @@ class Factory extends CommonObject
 		libxml_use_internal_errors(true);
 		$sxe = simplexml_load_string($xml);
 		if ($sxe === false) {
-			echo "Erreur lors du chargement du XML\n";
-			foreach (libxml_get_errors() as $error) {
-				echo "\t", $error->message;
-			}
-		} else
+  			echo "Erreur lors du chargement du XML\n";
+  			foreach (libxml_get_errors() as $error) {
+  				echo "\t", $error->message;
+  			}
+			return -1;
+  		} else
 			$arraydata = json_decode(json_encode($sxe), TRUE);
 
 		// on vire la précédente composition

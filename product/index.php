@@ -236,7 +236,7 @@ if ($action == 'updateprice') {
 }
 
 if ($action == 'importation') {
-	$factory->importComposition(GETPOST("importexport"));
+	$factory->importComposition(GETPOST("importexport", 'none'));
 	$action="";
 }
 
