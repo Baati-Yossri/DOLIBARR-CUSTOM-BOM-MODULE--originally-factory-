@@ -24,7 +24,7 @@
 /**
  *  \file	   htdocs/factory/product/index.php
  *  \ingroup	product
- *  \brief	  Page de définition de la fabrication
+ *  \brief	  Page de dÃ©finition de la fabrication
  */
 
 $res=0;
@@ -78,6 +78,86 @@ if ($id || $ref) {
  * Actions
  */
 
+// Delete component confirmation modal (new inline table)
+if ($action == 'ask_delete_component' && ($user->rights->produit->creer || $user->rights->service->creer || $user->rights->factory->creer)) {
+	$lineid = GETPOST('lineid', 'int');
+	if (!is_object($form)) {
+		require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
+		$form = new Form($db);
+	}
+	$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$id.'&lineid='.$lineid.'&token='.$_SESSION['newtoken'], $langs->trans("Delete"), $langs->trans("ConfirmDelete"), 'delete_component', '', 0, 1);
+}
+
+// Delete component execution (new inline table)
+if ($action == 'delete_component' && ($user->rights->produit->creer || $user->rights->service->creer || $user->rights->factory->creer)) {
+	if (GETPOST('token', 'alpha') == $_SESSION['newtoken']) {
+		$lineid = GETPOST('lineid', 'int');
+		if ($lineid > 0) {
+			$result = $factory->del_component($id, $lineid);
+			if ($result > 0) {
+				$mesg = '<div class="ok">' . $langs->trans("RecordDeleted") . '</div>';
+			} else {
+				$mesg = '<div class="error">' . $factory->error . '</div>';
+			}
+		}
+		header("Location: ".$_SERVER["PHP_SELF"].'?id='.$id);
+		exit;
+	} else {
+		$mesg = '<div class="error">' . $langs->trans("ErrorBadParameters") . '</div>';
+	}
+}
+
+// Add component inline execution (new inline table)
+if ($action == 'add_component' && ($user->rights->produit->creer || $user->rights->service->creer || $user->rights->factory->creer)) {
+	if (GETPOST('token', 'alpha') == $_SESSION['newtoken']) {
+		$add_fk_product = GETPOST('add_fk_product', 'int');
+		$add_qty = GETPOST('add_qty', 'double');
+		$add_fk_entrepot = GETPOST('add_fk_entrepot', 'int');
+
+		if ($add_fk_product > 0 && $add_qty > 0) {
+			$result = $factory->add_component($id, $add_fk_product, $add_qty, 0, 0, 0, '', 0, $add_fk_entrepot);
+			if ($result > 0) {
+				$mesg = '<div class="ok">' . $langs->trans("RecordSaved") . '</div>';
+			} else {
+				if ($factory->error == "isFatherOfThis") {
+					$mesg = '<div class="error">' . $langs->trans("ErrorAssociationIsFatherOfThis") . '</div>';
+				} else {
+					$mesg = '<div class="error">' . $factory->error . '</div>';
+				}
+			}
+		} else {
+			$mesg = '<div class="error">' . $langs->trans("ErrorFieldRequired", $langs->trans("Product") . " / " . $langs->trans("Quantity")) . '</div>';
+		}
+		header("Location: ".$_SERVER["PHP_SELF"].'?id='.$id);
+		exit;
+	} else {
+		$mesg = '<div class="error">' . $langs->trans("ErrorBadParameters") . '</div>';
+	}
+}
+
+// Save line edit execution (new inline table)
+if ($action == 'saveline' && ($user->rights->produit->creer || $user->rights->service->creer || $user->rights->factory->creer)) {
+	if (GETPOST('token', 'alpha') == $_SESSION['newtoken']) {
+		$lineid = GETPOST('lineid', 'int');
+		$qty = GETPOST('qty', 'double');
+		$fk_entrepot = GETPOST('fk_entrepot', 'int');
+
+		if ($lineid > 0 && $qty > 0) {
+			$result = $factory->add_component($id, $lineid, $qty, 0, 0, 0, '', 0, $fk_entrepot);
+			if ($result > 0) {
+				$mesg = '<div class="ok">' . $langs->trans("RecordSaved") . '</div>';
+			} else {
+				$mesg = '<div class="error">' . $factory->error . '</div>';
+			}
+		} else {
+			$mesg = '<div class="error">' . $langs->trans("ErrorFieldRequired", $langs->trans("Quantity")) . '</div>';
+		}
+		header("Location: ".$_SERVER["PHP_SELF"].'?id='.$id);
+		exit;
+	} else {
+		$mesg = '<div class="error">' . $langs->trans("ErrorBadParameters") . '</div>';
+	}
+}
 
 // add sub-product to a product
 if ( $action == 'add_prod' && $cancel <> $langs->trans("Cancel") 
@@ -123,7 +203,7 @@ if ($cancel == $langs->trans("Cancel")) {
 }
 
 if ($action == 'getfromvirtual') {	
-	// on récupère la fabrication de la composition virtuelle
+	// on rÃ©cupÃ¨re la fabrication de la composition virtuelle
 	$factory->clonefromvirtual();
 	$action="";
 }
@@ -168,7 +248,7 @@ if ($action == 'search') {
 	$addselected=GETPOST("addselected");
 	$keysearch=GETPOST('keysearch');
 	
-	// filtre sélectionné on filtre
+	// filtre sÃ©lectionnÃ© on filtre
 	$sql = 'SELECT DISTINCT p.rowid, p.ref, p.label, p.price, p.fk_product_type as type, p.pmp';
 	if ($conf->global->factory_extrafieldsNameInfo)
 		$sql.= ' , pe.'.$conf->global->factory_extrafieldsNameInfo. ' as addinforecup';
@@ -178,7 +258,7 @@ if ($action == 'search') {
 	$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields as pe ON p.rowid = pe.fk_object';
 	$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_product as cp ON p.rowid = cp.fk_product';
 	$sql.= ' WHERE p.entity IN ('.getEntity("product", 1).')';
-	$sql.= " AND p.rowid <> ".$productid;		 // pour ne pas afficher le produit lui-même
+	$sql.= " AND p.rowid <> ".$productid;		 // pour ne pas afficher le produit lui-mÃªme
 	if ($keysearch != "") {
 		$sql.= " AND (p.ref LIKE '%".$keysearch."%'";
 		$sql.= " OR p.label LIKE '%".$keysearch."%')";
@@ -196,7 +276,7 @@ if ($action == 'search') {
 		$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields as pe ON p.rowid = pe.fk_object';
 		$sql.= ' , '.MAIN_DB_PREFIX.'product_factory as pf WHERE pf.fk_product_children = p.rowid';
 		$sql.= ' AND p.entity IN ('.getEntity("product", 1).')';
-		// pour afficher les produits déjà sélectionnés
+		// pour afficher les produits dÃ©jÃ  sÃ©lectionnÃ©s
 		$sql.= " AND pf.fk_product_father = ".$productid;
 	}
 	//$sql.= " ORDER BY p.ref ASC";
@@ -214,6 +294,10 @@ $formproduct = new FormProduct($db);
 llxHeader("", "", $langs->trans("CardProduct".$product->type));
 
 dol_htmloutput_mesg($mesg);
+
+if (! empty($formconfirm)) {
+	print $formconfirm;
+}
 
 $head=product_prepare_head($object, $user);
 $titre=$langs->trans("CardProduct".$object->type);
@@ -355,7 +439,7 @@ if ($id || $ref) {
 		print '</table>';
 		dol_fiche_end();
 
-		// indique si on a déjà une composition de présente ou pas
+		// indique si on a dÃ©jÃ  une composition de prÃ©sente ou pas
 		$compositionpresente=0;
 		
 		$head=factory_product_prepare_head($object, $user);
@@ -363,7 +447,7 @@ if ($id || $ref) {
 		$picto="factory@factory";
 		dol_fiche_head($head, 'composition', $titre, 0, $picto);
 
-		// pour connaitre les produits composé du produits
+		// pour connaitre les produits composÃ© du produits
 		$prodsfather = $factory->getFather(); //Parent Products
 
 		// pour connaitre les produits composant le produits
@@ -406,17 +490,25 @@ if ($id || $ref) {
 			print_fiche_titre($langs->trans("FactorisedProductsNumber").' : '.count($prods_arbo), '', '');
 			
 			// List of subproducts
-			if (count($prods_arbo) > 0) {
+			if (count($prods_arbo) > 0 || ($user->rights->factory->creer || $user->rights->produit->creer || $user->rights->service->creer)) {
 				print "<br>";
-				$compositionpresente=1;
+				$compositionpresente = (count($prods_arbo) > 0 ? 1 : 0);
 				print '<b>'.$langs->trans("FactoryTableInfo").'</b><BR>';
-				print '<table class="border" >';
+
+				print '<form action="'.$_SERVER["PHP_SELF"].'?id='.$id.'" method="POST">';
+				print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+				
+				print '<style>
+					table.composition-table th.liste_titre { white-space: nowrap; padding-left: 8px; padding-right: 8px; }
+					table.composition-table td .select2-container { max-width: 350px !important; width: 100% !important; }
+				</style>';
+				print '<table class="border composition-table" width="100%">';
 				print '<tr class="liste_titre">';
 				print '<th class="liste_titre" width=10px></th>';
 				print '<th class="liste_titre" width=100px align="left">'.$langs->trans("Ref").'</th>';
 				print '<th class="liste_titre" width=200px align="left">'.$langs->trans("Label").'</th>';
-				print '<th class="liste_titre" width=50px align="center">'.$langs->trans("QtyNeed").'</th>';
-				// on affiche la colonne stock même si cette fonction n'est pas active
+				print '<th class="liste_titre" width=80px align="center">'.$langs->trans("QtyNeed").'</th>';
+				// on affiche la colonne stock mÃªme si cette fonction n'est pas active
 				print '<th class="liste_titre" width=50px align="center">'.$langs->trans("QtyStock").'</th>'; 
 				print '<th class="liste_titre" width=100px align="center">'.$langs->trans("QtyOrder").'</th>';
 				if ($conf->stock->enabled) { 	// we display vwap titles
@@ -430,101 +522,156 @@ if ($id || $ref) {
 				print '<th class="liste_titre" width=100px align="right">'.$langs->trans("FactoryUnitPriceHT").'</th>';
 				print '<th class="liste_titre" width=100px align="right">'.$langs->trans("FactorySellingPriceHT").'</th>';
 				print '<th class="liste_titre" width=100px align="right">'.$langs->trans("ProfitAmount").'</th>';
-	
-								print '<th class="liste_titre" width=100px align="center">'.$langs->trans("Warehouse").'</th>';
+				print '<th class="liste_titre" width=100px align="center">'.$langs->trans("Warehouse").'</th>';
+				print '<th class="liste_titre" width=80px align="center">'.$langs->trans("Actions").'</th>';
 				print '</tr>';
 				$mntTot=0;
 				$pmpTot=0;
 
-				foreach ($prods_arbo as $value) {
-					//var_dump($value);
-					// verify if product have child then display it after the product name
-					$tmpChildArbo=$factory->getChildsArbo($value['id']);
-					$nbChildArbo="";
-					if (count($tmpChildArbo) > 0) $nbChildArbo=" (".count($tmpChildArbo).")";
-	
-					print '<tr><td>';
-					print "<a href='#line".$objp->rowid."' onclick=\"$('.detaillignecomposition".$objp->rowid."').toggle();\" >";
-					print img_picto("", "edit_add")."</a>";
-					print '</td>';
-					print '<td align="left">'.$factory->getNomUrlFactory($value['id'], 1, 'index').$nbChildArbo;
-					print $factory->PopupProduct($value['id']);
-					print '</td>';
-	
-					print '<td align="left">';
-					print $value['label'].'</td>';
-					print '<td align="center">'.$value['nb'];
-					if ($value['globalqty'] == 1)
-						print "&nbsp;G";
-					print '</td>';
-					$price=$value['price'];
-					$pmp=$value['pmp'];
-	
-	
-					if ($conf->stock->enabled) {
-						// we store vwap in variable pmp and display stock
-						$productstatic->fetch($value['id']);
-						if ($value['fk_product_type']==0) {
-							// if product
-							$productstatic->load_stock();
-							print '<td align=center>'.$factory->getUrlStock($value['id'], 1, $productstatic->stock_reel).'</td>';
-							$nbcmde=0;
-							// on regarde si il n'y pas de commande fournisseur en cours
-							$sql = 'SELECT DISTINCT sum(cofd.qty) as nbCmdFourn';
-							$sql.= " FROM ".MAIN_DB_PREFIX."commande_fournisseurdet as cofd";
-							$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."commande_fournisseur as cof ON cof.rowid = cofd.fk_commande";
-							$sql.= " WHERE cof.entity = ".$conf->entity;
-							$sql.= " AND cof.fk_statut = 3";
-							$sql.= " and cofd.fk_product=".$value['id'];
-							//print $sql;
-							$resql = $db->query($sql);
-							if ($resql) {
-								$objp = $db->fetch_object($resql);
-								if ($objp->nbCmdFourn)
-									$nbcmde=$objp->nbCmdFourn;
-							}
-							print '<td align=right>'.$nbcmde.'</td>';
-						} else	// no stock management for services
-							print '<td></td>';
-					}
-					else	// no stock management for services
-						print '<td></td>';
-					
-					print '<td align="right">'.price($pmp).'</td>'; // display else vwap or else latest purchasing price
-					print '<td align="right">'.price($pmp*$value['nb']).'</td>'; // display total line
-					print '<td align="right">'.price($price).'</td>';
-					print '<td align="right">'.price($price*$value['nb']).'</td>';
-					print '<td align="right">'.price(($price-$pmp)*$value['nb']).'</td>'; 
-					
-										if (! empty($value['fk_entrepot'])) {
-						$entrepot = new Entrepot($db);
-						$entrepot->fetch($value['fk_entrepot']);
-						print '<td align="center">'.$entrepot->ref.'</td>';
-					} else {
-						print '<td align="center"></td>';
-					}
-					$mntTot=$mntTot+$price*$value['nb'];
-					$pmpTot=$pmpTot+$pmp*$value['nb']; // sub total calculation
-					
-					print '</tr>';
-					print "<tr style='display:none' class='detaillignecomposition".$objp->rowid."'>";
-					print '<td colspan=2>'.$langs->trans("Position")." : ".$value['ordercomponent'].'</td>';
-					print '<td colspan=9>'.$langs->trans("InfoAnnexes")." : ".$value['description'].'</td>';
-					print '</tr>';
-					//var_dump($value);
-					//print '<pre>'.$productstatic->ref.'</pre>';
-					//print $productstatic->getNomUrl(1).'<br>';
-					//print $value[0];	// This contains a tr line.
-				}
-				print '<tr class="liste_total">';
-				print '<td colspan=7 align=right >'.$langs->trans("Total").'</td>';
-				print '<td align="right" >'.price($pmpTot).'</td>';
-				print '<td ></td>';
-				print '<td align="right" >'.price($mntTot).'</td>';
-				print '<td align="right" >'.price($mntTot-$pmpTot).'</td>';
+				$canedit = ($user->rights->factory->creer || $user->rights->produit->creer || $user->rights->service->creer);
+
+				if (count($prods_arbo) > 0) {
+					foreach ($prods_arbo as $value) {
+						// verify if product have child then display it after the product name
+						$tmpChildArbo=$factory->getChildsArbo($value['id']);
+						$nbChildArbo="";
+						if (count($tmpChildArbo) > 0) $nbChildArbo=" (".count($tmpChildArbo).")";
+
+						$editmode = ($action == 'editline' && GETPOST('lineid', 'int') == $value['id']);
+
+						print '<tr id="line_'.$value['id'].'">';
+						print '<td>';
+						print "<a href='#line_".$value['id']."' onclick=\"$('.detaillignecomposition".$value['id']."').toggle();\" >";
+						print img_picto("", "edit_add")."</a>";
+						print '</td>';
+						
+						// Ref
+						print '<td align="left">'.$factory->getNomUrlFactory($value['id'], 1, 'index').$nbChildArbo;
+						print $factory->PopupProduct($value['id']);
+						print '</td>';
+		
+						// Label
+						print '<td align="left">'.$value['label'].'</td>';
+						
+						// Quantity
+						print '<td align="center">';
+						if ($editmode && $canedit) {
+							print '<input type="text" name="qty" size="4" value="'.$value['nb'].'">';
+						} else {
+							print $value['nb'];
+						}
+						if ($value['globalqty'] == 1)
+							print "&nbsp;G";
+						print '</td>';
+						
+						$price=$value['price'];
+						$pmp=$value['pmp'];
+		
+						if ($conf->stock->enabled) {
+							// we store vwap in variable pmp and display stock
+							$productstatic->fetch($value['id']);
+							if ($value['fk_product_type']==0) {
+								// if product
+								$productstatic->load_stock();
+								print '<td align=center>'.$factory->getUrlStock($value['id'], 1, $productstatic->stock_reel).'</td>';
+								$nbcmde=0;
+								// on regarde si il n'y pas de commande fournisseur en cours
+								$sql = 'SELECT DISTINCT sum(cofd.qty) as nbCmdFourn';
+								$sql.= " FROM ".MAIN_DB_PREFIX."commande_fournisseurdet as cofd";
+								$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."commande_fournisseur as cof ON cof.rowid = cofd.fk_commande";
+								$sql.= " WHERE cof.entity = ".$conf->entity;
+								$sql.= " AND cof.fk_statut = 3";
+								$sql.= " and cofd.fk_product=".$value['id'];
+								$resql = $db->query($sql);
+								if ($resql) {
+									$objp_sub = $db->fetch_object($resql);
+									if ($objp_sub && $objp_sub->nbCmdFourn)
+										$nbcmde=$objp_sub->nbCmdFourn;
+								}
+								print '<td align=right>'.$nbcmde.'</td>';
+							} else	// no stock management for services
 								print '<td></td>';
-				print '</tr>';
+						}
+						else	// no stock management for services
+							print '<td></td>';
+						
+						print '<td align="right">'.price($pmp).'</td>'; // display else vwap or else latest purchasing price
+						print '<td align="right">'.price($pmp*$value['nb']).'</td>'; // display total line
+						print '<td align="right">'.price($price).'</td>';
+						print '<td align="right">'.price($price*$value['nb']).'</td>';
+						print '<td align="right">'.price(($price-$pmp)*$value['nb']).'</td>'; 
+						
+						// Warehouse
+						print '<td align="center">';
+						if ($editmode && $canedit) {
+							print $formproduct->selectWarehouses($value['fk_entrepot'], 'fk_entrepot', '', 1);
+						} else {
+							if (! empty($value['fk_entrepot'])) {
+								$entrepot = new Entrepot($db);
+								$entrepot->fetch($value['fk_entrepot']);
+								print $entrepot->ref;
+							}
+						}
+						print '</td>';
+						
+						// Actions
+						print '<td align="center" class="nowrap">';
+						if ($canedit) {
+							if ($editmode) {
+								print '<input type="hidden" name="lineid" value="'.$value['id'].'">';
+								print '<button type="submit" name="action" value="saveline" class="button" style="padding: 2px 5px; margin-right: 5px;" title="'.$langs->trans("Save").'">'.img_picto('', 'check').'</button>';
+								print '<a href="'.$_SERVER["PHP_SELF"].'?id='.$id.'" class="button" style="padding: 3px 6px;" title="'.$langs->trans("Cancel").'">'.img_picto('', 'close').'</a>';
+							} else {
+								print '<a href="'.$_SERVER["PHP_SELF"].'?id='.$id.'&action=editline&lineid='.$value['id'].'#line_'.$value['id'].'" style="margin-right: 8px;" title="'.$langs->trans("Edit").'">'.img_picto('', 'edit').'</a>';
+								print '<a href="'.$_SERVER["PHP_SELF"].'?id='.$id.'&action=ask_delete_component&lineid='.$value['id'].'" title="'.$langs->trans("Delete").'">'.img_picto('', 'delete').'</a>';
+							}
+						}
+						print '</td>';
+						
+						$mntTot=$mntTot+$price*$value['nb'];
+						$pmpTot=$pmpTot+$pmp*$value['nb']; // sub total calculation
+						
+						print '</tr>';
+						print "<tr style='display:none' class='detaillignecomposition".$value['id']."'>";
+						print '<td colspan=3>'.$langs->trans("Position")." : ".$value['ordercomponent'].'</td>';
+						print '<td colspan=10>'.$langs->trans("InfoAnnexes")." : ".$value['description'].'</td>';
+						print '</tr>';
+					}
+				}
+
+				// Render the Add Component row if user has edit rights
+				if ($canedit) {
+					print '<tr class="liste_titre_add" style="background-color: #f8f9fa; border-top: 2px solid #dee2e6;">';
+					print '<td></td>';
+					print '<td colspan="2" align="left">';
+					print $form->select_produits('', 'add_fk_product', '', 0, 0, 1, 2, '', 0, array(), 0, '1');
+					print '</td>';
+					print '<td align="center">';
+					print '<input type="text" name="add_qty" size="4" value="1">';
+					print '</td>';
+					print '<td colspan="7"></td>';
+					print '<td align="center">';
+					print $formproduct->selectWarehouses(0, 'add_fk_entrepot', '', 1);
+					print '</td>';
+					print '<td align="center">';
+					print '<button type="submit" name="action" value="add_component" class="button">'.$langs->trans("Add").'</button>';
+					print '</td>';
+					print '</tr>';
+				}
+
+				if (count($prods_arbo) > 0) {
+					print '<tr class="liste_total">';
+					print '<td colspan=7 align=right >'.$langs->trans("Total").'</td>';
+					print '<td align="right" >'.price($pmpTot).'</td>';
+					print '<td ></td>';
+					print '<td align="right" >'.price($mntTot).'</td>';
+					print '<td align="right" >'.price($mntTot-$pmpTot).'</td>';
+					print '<td></td>';
+					print '<td></td>';
+					print '</tr>';
+				}
 				print '</table>';
+				print '</form>';
 			}
 		}
 		print '<br>';
@@ -722,7 +869,7 @@ if ($id || $ref) {
 							$addchecked = '';
 							$descComposant = $objp->addinforecup;
 							$qty="1";
-							$ordercomponent="0"; // par défaut pas d'ordre
+							$ordercomponent="0"; // par dÃ©faut pas d'ordre
 							$qtyglobal=0;
 							$fk_entrepot=0;
 						}
@@ -809,7 +956,7 @@ $object->fetch($id, $ref);
 
 if ($action == '' && $bproduit) {
 	if ($user->rights->factory->creer) {
-		//Le stock doit être actif et le produit ne doit pas être à l'achat
+		//Le stock doit Ãªtre actif et le produit ne doit pas Ãªtre Ã  l'achat
 		if ($conf->stock->enabled && $object->finished == '1') {
 			print '<a class="butAction" href="index.php?action=edit&amp;id='.$productid.'">';
 			print $langs->trans("EditComponent").'</a>';

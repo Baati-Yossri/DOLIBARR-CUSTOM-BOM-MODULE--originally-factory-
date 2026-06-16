@@ -7,13 +7,14 @@
 
 CREATE TABLE IF NOT EXISTS llx_product_factory (
   rowid				integer NOT NULL AUTO_INCREMENT,
-  fk_product_father	integer NOT NULL DEFAULT 0,		-- clé produit composé
-  fk_product_children	integer NOT NULL DEFAULT 0,		-- clé produit composant
+  fk_product_father	integer NOT NULL DEFAULT 0,		-- clÃ© produit composÃ©
+  fk_product_children	integer NOT NULL DEFAULT 0,		-- clÃ© produit composant
   pmp					double(24,8) DEFAULT 0,			-- prix unitaire d'achat
   price				double(24,8) DEFAULT 0,			-- prix unitaire de vente
-  qty 				double DEFAULT NULL,			-- quantité entrant dans la fabrication
+  qty 				double DEFAULT NULL,			-- quantitÃ© entrant dans la fabrication
   ordercomponent		integer NOT NULL DEFAULT 0,			-- l'ordre d'affichage des composants
-  globalqty			integer NOT NULL DEFAULT 0,			-- La quantité est à prendre au détail ou au global
+  globalqty			integer NOT NULL DEFAULT 0,			-- La quantitÃ© est Ã  prendre au dÃ©tail ou au global
+  fk_entrepot			integer DEFAULT 0,				-- Warehouse ID
   description			text,         					-- description
   PRIMARY KEY (rowid),
   UNIQUE KEY uk_product_factory (fk_product_father,fk_product_children),
