@@ -1215,19 +1215,8 @@ class Factory extends CommonObject
 
 		$result='';
 
-		if ($option == 'index') {
-			$lien = '<a href="'.dol_buildpath('/factory/product/', 1).'index.php?id='.$id.'">';
-			$lienfin='</a>';
-		} elseif ($option == 'fiche') {
-			$lien = '<a href="'.dol_buildpath('/factory/product/', 1).'fiche.php?id='.$id.'">';
-			$lienfin='</a>';
-		} elseif ($option == 'direct') {
-			$lien = '<a href="'.dol_buildpath('/factory/product/', 1).'direct.php?id='.$id.'">';
-			$lienfin='</a>';
-		} else {
-			$lien = '<a href="'.DOL_URL_ROOT.'/product/fiche.php?id='.$id.'">';
-			$lienfin='</a>';
-		}
+		$lien = '<a href="'.DOL_URL_ROOT.'/product/card.php?id='.$id.'">';
+		$lienfin='</a>';
 		if ($productref=='') {
 			$tmpproduct = new Product($this->db);
 			$tmpproduct->fetch($id);
