@@ -579,6 +579,7 @@ if ($id || $ref) {
 								if (!empty($value['fk_entrepot'])) {
 									$qty_stock = isset($productstatic->stock_warehouse[$value['fk_entrepot']]) ? $productstatic->stock_warehouse[$value['fk_entrepot']]->real : 0;
 								}
+								$qty_stock = round($qty_stock, 5);
 								print '<td align=center>'.$factory->getUrlStock($value['id'], 1, $qty_stock).'</td>';
 								$nbcmde=0;
 								// on regarde si il n'y pas de commande fournisseur en cours
