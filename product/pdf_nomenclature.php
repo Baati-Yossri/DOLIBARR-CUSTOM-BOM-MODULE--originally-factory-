@@ -53,16 +53,18 @@ $pdf->Ln(10);
 // Table Header
 $pdf->SetFont('helvetica', 'B', 10);
 $pdf->SetFillColor(230, 230, 230);
+$pdf->Cell(10, 8, 'N°', 1, 0, 'C', 1);
 $pdf->Cell(25, 8, 'Réf', 1, 0, 'C', 1);
-$pdf->Cell(85, 8, 'Désignation', 1, 0, 'C', 1);
-$pdf->Cell(45, 8, 'Fournisseur', 1, 0, 'C', 1);
-$pdf->Cell(20, 8, 'Unité', 1, 0, 'C', 1);
+$pdf->Cell(90, 8, 'Désignation', 1, 0, 'C', 1);
+$pdf->Cell(35, 8, 'Fournisseur', 1, 0, 'C', 1);
+$pdf->Cell(15, 8, 'Unité', 1, 0, 'C', 1);
 $pdf->Cell(15, 8, 'Besoin', 1, 1, 'C', 1);
 
 // Table Content
 $pdf->SetFont('helvetica', '', 9);
 
 $productstatic = new Product($db);
+$counter = 1;
 
 foreach ($prods_arbo as $value) {
     $productstatic->fetch($value['id']);
@@ -91,48 +93,58 @@ foreach ($prods_arbo as $value) {
     if ($resql && $db->num_rows($resql) > 0) {
         $obj = $db->fetch_object($resql);
         $fournisseur_name = $obj->nom;
+        $words = explode(' ', $fournisseur_name);
+        if (count($words) > 2) {
+            $fournisseur_name = $words[0] . ' ' . $words[1];
+        }
     }
     
     // Check if we need a page break
     if ($pdf->GetY() > 270) {
         $pdf->AddPage();
         $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(10, 8, 'N°', 1, 0, 'C', 1);
         $pdf->Cell(25, 8, 'Réf', 1, 0, 'C', 1);
-        $pdf->Cell(85, 8, 'Désignation', 1, 0, 'C', 1);
-        $pdf->Cell(45, 8, 'Fournisseur', 1, 0, 'C', 1);
-        $pdf->Cell(20, 8, 'Unité', 1, 0, 'C', 1);
+        $pdf->Cell(90, 8, 'Désignation', 1, 0, 'C', 1);
+        $pdf->Cell(35, 8, 'Fournisseur', 1, 0, 'C', 1);
+        $pdf->Cell(15, 8, 'Unité', 1, 0, 'C', 1);
         $pdf->Cell(15, 8, 'Besoin', 1, 1, 'C', 1);
         $pdf->SetFont('helvetica', '', 9);
     }
     
     // MultiCell handles wrapping for long labels, but we need to align the row.
     // A simple way is to find the maximum height needed for the row.
-    $nbLinesLabel = $pdf->getNumLines($productstatic->label, 85);
-    $nbLinesFourn = $pdf->getNumLines($fournisseur_name, 45);
+    $nbLinesLabel = $pdf->getNumLines($productstatic->label, 90);
+    $nbLinesFourn = $pdf->getNumLines($fournisseur_name, 35);
     $nbLines = max($nbLinesLabel, $nbLinesFourn);
     $h = 6 * $nbLines;
     
     $x = $pdf->GetX();
     $y = $pdf->GetY();
     
+    // N°
+    $pdf->Rect($x, $y, 10, $h);
+    $pdf->MultiCell(10, 6, $counter++, 0, 'C', 0, 0);
+    $pdf->SetXY($x + 10, $y);
+    
     // Réf
-    $pdf->Rect($x, $y, 25, $h);
+    $pdf->Rect($x + 10, $y, 25, $h);
     $pdf->MultiCell(25, 6, $productstatic->ref, 0, 'L', 0, 0);
-    $pdf->SetXY($x + 25, $y);
+    $pdf->SetXY($x + 35, $y);
     
     // Désignation
-    $pdf->Rect($x + 25, $y, 85, $h);
-    $pdf->MultiCell(85, 6, $productstatic->label, 0, 'L', 0, 0);
-    $pdf->SetXY($x + 110, $y);
+    $pdf->Rect($x + 35, $y, 90, $h);
+    $pdf->MultiCell(90, 6, $productstatic->label, 0, 'L', 0, 0);
+    $pdf->SetXY($x + 125, $y);
     
     // Fournisseur
-    $pdf->Rect($x + 110, $y, 45, $h);
-    $pdf->MultiCell(45, 6, $fournisseur_name, 0, 'L', 0, 0);
-    $pdf->SetXY($x + 155, $y);
+    $pdf->Rect($x + 125, $y, 35, $h);
+    $pdf->MultiCell(35, 6, $fournisseur_name, 0, 'L', 0, 0);
+    $pdf->SetXY($x + 160, $y);
     
     // Unité
-    $pdf->Rect($x + 155, $y, 20, $h);
-    $pdf->MultiCell(20, $h, $unit_label, 0, 'C', 0, 0);
+    $pdf->Rect($x + 160, $y, 15, $h);
+    $pdf->MultiCell(15, $h, $unit_label, 0, 'C', 0, 0);
     $pdf->SetXY($x + 175, $y);
     
     // Besoin
