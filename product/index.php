@@ -489,6 +489,9 @@ if ($id || $ref) {
 			print '</center>';
 			print '</form>';
 		} else {
+			print '<div class="tabsAction">';
+			print '<a class="butAction" href="pdf_nomenclature.php?id='.$id.'" target="_blank">Imprimer Nomenclature</a>';
+			print '</div>';
 			print_fiche_titre($langs->trans("FactorisedProductsNumber").' : '.count($prods_arbo), '', '');
 			
 			// List of subproducts
