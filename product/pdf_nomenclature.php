@@ -54,10 +54,10 @@ $pdf->Ln(10);
 $pdf->SetFont('helvetica', 'B', 10);
 $pdf->SetFillColor(230, 230, 230);
 $pdf->Cell(25, 8, 'Réf', 1, 0, 'C', 1);
-$pdf->Cell(75, 8, 'Désignation', 1, 0, 'C', 1);
+$pdf->Cell(85, 8, 'Désignation', 1, 0, 'C', 1);
 $pdf->Cell(45, 8, 'Fournisseur', 1, 0, 'C', 1);
 $pdf->Cell(20, 8, 'Unité', 1, 0, 'C', 1);
-$pdf->Cell(25, 8, 'Besoin', 1, 1, 'C', 1);
+$pdf->Cell(15, 8, 'Besoin', 1, 1, 'C', 1);
 
 // Table Content
 $pdf->SetFont('helvetica', '', 9);
@@ -98,16 +98,16 @@ foreach ($prods_arbo as $value) {
         $pdf->AddPage();
         $pdf->SetFont('helvetica', 'B', 10);
         $pdf->Cell(25, 8, 'Réf', 1, 0, 'C', 1);
-        $pdf->Cell(75, 8, 'Désignation', 1, 0, 'C', 1);
+        $pdf->Cell(85, 8, 'Désignation', 1, 0, 'C', 1);
         $pdf->Cell(45, 8, 'Fournisseur', 1, 0, 'C', 1);
         $pdf->Cell(20, 8, 'Unité', 1, 0, 'C', 1);
-        $pdf->Cell(25, 8, 'Besoin', 1, 1, 'C', 1);
+        $pdf->Cell(15, 8, 'Besoin', 1, 1, 'C', 1);
         $pdf->SetFont('helvetica', '', 9);
     }
     
     // MultiCell handles wrapping for long labels, but we need to align the row.
     // A simple way is to find the maximum height needed for the row.
-    $nbLinesLabel = $pdf->getNumLines($productstatic->label, 75);
+    $nbLinesLabel = $pdf->getNumLines($productstatic->label, 85);
     $nbLinesFourn = $pdf->getNumLines($fournisseur_name, 45);
     $nbLines = max($nbLinesLabel, $nbLinesFourn);
     $h = 6 * $nbLines;
@@ -121,24 +121,24 @@ foreach ($prods_arbo as $value) {
     $pdf->SetXY($x + 25, $y);
     
     // Désignation
-    $pdf->Rect($x + 25, $y, 75, $h);
-    $pdf->MultiCell(75, 6, $productstatic->label, 0, 'L', 0, 0);
-    $pdf->SetXY($x + 100, $y);
+    $pdf->Rect($x + 25, $y, 85, $h);
+    $pdf->MultiCell(85, 6, $productstatic->label, 0, 'L', 0, 0);
+    $pdf->SetXY($x + 110, $y);
     
     // Fournisseur
-    $pdf->Rect($x + 100, $y, 45, $h);
+    $pdf->Rect($x + 110, $y, 45, $h);
     $pdf->MultiCell(45, 6, $fournisseur_name, 0, 'L', 0, 0);
-    $pdf->SetXY($x + 145, $y);
+    $pdf->SetXY($x + 155, $y);
     
     // Unité
-    $pdf->Rect($x + 145, $y, 20, $h);
+    $pdf->Rect($x + 155, $y, 20, $h);
     $pdf->MultiCell(20, $h, $unit_label, 0, 'C', 0, 0);
-    $pdf->SetXY($x + 165, $y);
+    $pdf->SetXY($x + 175, $y);
     
     // Besoin
-    $pdf->Rect($x + 165, $y, 25, $h);
+    $pdf->Rect($x + 175, $y, 15, $h);
     $qty_display = $value['nb'] . ($value['globalqty'] == 1 ? ' G' : '');
-    $pdf->MultiCell(25, $h, $qty_display, 0, 'C', 0, 0);
+    $pdf->MultiCell(15, $h, $qty_display, 0, 'C', 0, 0);
     
     $pdf->SetXY($x, $y + $h);
 }
