@@ -62,10 +62,7 @@ function factory_product_prepare_head($object, $user=0)
 	$head[$h][1] = $langs->trans("Composition");
 	$head[$h][2] = 'composition';
 	$h++;
-	$head[$h][0] = dol_buildpath("/custom/factory/product/direct.php?id=".$object->id, 1);
-	$head[$h][1] = $langs->trans("DirectBuild");
-	$head[$h][2] = 'directbuild';
-	$h++;
+
 
 	complete_head_from_modules($conf, $langs, $object, $head, $h, 'factory_product');
 
