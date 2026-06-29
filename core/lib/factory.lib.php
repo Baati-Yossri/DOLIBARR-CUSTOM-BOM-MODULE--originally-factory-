@@ -50,7 +50,7 @@ function factory_admin_prepare_head()
 	return $head;
 }
 
-function factory_product_prepare_head($object, $user = 0)
+function factory_product_prepare_head($object, $user=0)
 {
 	global $langs, $conf;
 	$langs->load('factory@factory');
@@ -58,14 +58,11 @@ function factory_product_prepare_head($object, $user = 0)
 	$h = 0;
 	$head = array();
 
-	$head[$h][0] = dol_buildpath("/custom/factory/product/index.php?id=" . $object->id, 1);
+	$head[$h][0] = dol_buildpath("/custom/factory/product/index.php?id=".$object->id, 1);
 	$head[$h][1] = $langs->trans("Composition");
 	$head[$h][2] = 'composition';
 	$h++;
-	$head[$h][0] = dol_buildpath("/custom/factory/product/direct.php?id=" . $object->id, 1);
-	$head[$h][1] = $langs->trans("DirectBuild");
-	$head[$h][2] = 'directbuild';
-	$h++;
+
 
 	complete_head_from_modules($conf, $langs, $object, $head, $h, 'factory_product');
 
@@ -89,57 +86,54 @@ function factory_product_prepare_head($object, $user = 0)
  * 	@param	int		$idproduct		display the Qty of product id if 
  *  @return	void
  */
-function select_entrepot_list($selected = '', $htmlname = 'entrepotid', $showempty = 0, $hidetext = 0, $idproduct = 0)
+function select_entrepot_list($selected='', $htmlname='entrepotid', $showempty=0, $hidetext=0, $idproduct=0)
 {
 	global $db, $langs; //, $user, $conf;
 
-	$res = "";
+	$res= "";
 
-	if (empty($hidetext))
-		$res = $langs->trans("EntrepotStock") . ': ';
+	if (empty($hidetext)) $res= $langs->trans("EntrepotStock").': ';
 
 	// boucle sur les entrepots 
-	$sql = "SELECT rowid, " . ((int) DOL_VERSION >= 7 ? "ref as " : "") . "label, zip";
+	$sql = "SELECT rowid, ".((int) DOL_VERSION >=7 ?"ref as ":"")."label, zip";
 
-	$sql .= " FROM " . MAIN_DB_PREFIX . "entrepot";
+	$sql.= " FROM ".MAIN_DB_PREFIX."entrepot";
 	//$sql.= " WHERE statut = 1";
-	$sql .= " ORDER BY zip, rowid ASC";
+	$sql.= " ORDER BY zip, rowid ASC";
 
-	dol_syslog("factory.lib::select_entrepot_list sql=" . $sql);
+	dol_syslog("factory.lib::select_entrepot_list sql=".$sql);
 
-	$resql = $db->query($sql);
+	$resql=$db->query($sql);
 	if ($resql) {
 		$num = $db->num_rows($resql);
 		$i = 0;
 		if ($num) {
-			$res .= '<select class="flat" id="' . $htmlname . '" name="' . $htmlname . '">';
+			$res.='<select class="flat" id="'.$htmlname.'" name="'.$htmlname.'">';
 			if ($showempty) {
-				$res .= '<option value="-1"';
-				if ($selected == -1)
-					$res .= ' selected="selected"';
-				$res .= '>&nbsp;</option>';
+				$res.='<option value="-1"';
+				if ($selected == -1) $res.=' selected="selected"';
+				$res.='>&nbsp;</option>';
 			}
 			while ($i < $num) {
 				$obj = $db->fetch_object($resql);
-				$qtereel = 0;
-				$sql = "select ps.reel FROM " . MAIN_DB_PREFIX . "product_stock as ps";
-				$sql .= " WHERE ps.fk_product = " . $idproduct;
-				$sql .= " AND ps.fk_entrepot = " . $obj->rowid;
-				$resreel = $db->query($sql);
+				$qtereel=0;
+				$sql="select ps.reel FROM ".MAIN_DB_PREFIX."product_stock as ps";
+				$sql.= " WHERE ps.fk_product = ".$idproduct;
+				$sql.= " AND ps.fk_entrepot = ".$obj->rowid;
+				$resreel=$db->query($sql);
 				if ($resreel) {
 					$objreel = $db->fetch_object($resreel);
-					$qtereel = ($objreel->reel ? $objreel->reel : 0);
+					$qtereel=($objreel->reel?$objreel->reel:0);
 				}
-				$res .= '<option value="' . $obj->rowid . '"';
-				if ($obj->rowid == $selected)
-					$res .= ' selected="selected"';
-				$res .= ">" . $obj->label . " (" . $qtereel . ")</option>";
+				$res.='<option value="'.$obj->rowid.'"';
+				if ($obj->rowid == $selected) $res.=' selected="selected"';
+				$res.=">".$obj->label." (".$qtereel.")</option>";
 				$i++;
 			}
-			$res .= '</select>';
+			$res.='</select>';
 		} else {
 			// si pas de liste, on positionne un hidden à vide
-			$res .= '<input type="hidden" name="' . $htmlname . '" value=-1>';
+			$res.='<input type="hidden" name="'.$htmlname.'" value=-1>';
 		}
 	}
 	return $res;
