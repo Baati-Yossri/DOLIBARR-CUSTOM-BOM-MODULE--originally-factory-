@@ -376,8 +376,17 @@ class Factory extends CommonObject
 			if (!$this->db->query($sql)) {
 				dol_print_error($this->db);
 				return -1;
-			} else
+			} else {
+				$sql_check_ext = "SELECT rowid FROM " . MAIN_DB_PREFIX . "product_extrafields WHERE fk_object = " . $fk_parent;
+				$res_check_ext = $this->db->query($sql_check_ext);
+				if ($res_check_ext && $this->db->num_rows($res_check_ext) > 0) {
+					$sql_extra = "UPDATE " . MAIN_DB_PREFIX . "product_extrafields SET has_nomenclature = '1' WHERE fk_object = " . $fk_parent;
+				} else {
+					$sql_extra = "INSERT INTO " . MAIN_DB_PREFIX . "product_extrafields (fk_object, has_nomenclature) VALUES (" . $fk_parent . ", '1')";
+				}
+				$this->db->query($sql_extra);
 				return 1;
+			}
 		}
 	}
 
@@ -575,6 +584,18 @@ class Factory extends CommonObject
 			dol_print_error($this->db);
 			return -1;
 		}
+
+		$sql_check = "SELECT rowid FROM " . MAIN_DB_PREFIX . "product_factory WHERE fk_product_father = " . $fk_parent;
+		$res_check = $this->db->query($sql_check);
+		$has_nomenclature = ($res_check && $this->db->num_rows($res_check) > 0) ? '1' : '0';
+		$sql_check_ext = "SELECT rowid FROM " . MAIN_DB_PREFIX . "product_extrafields WHERE fk_object = " . $fk_parent;
+		$res_check_ext = $this->db->query($sql_check_ext);
+		if ($res_check_ext && $this->db->num_rows($res_check_ext) > 0) {
+			$sql_extra = "UPDATE " . MAIN_DB_PREFIX . "product_extrafields SET has_nomenclature = '" . $has_nomenclature . "' WHERE fk_object = " . $fk_parent;
+		} else {
+			$sql_extra = "INSERT INTO " . MAIN_DB_PREFIX . "product_extrafields (fk_object, has_nomenclature) VALUES (" . $fk_parent . ", '" . $has_nomenclature . "')";
+		}
+		$this->db->query($sql_extra);
 
 		return 1;
 	}
