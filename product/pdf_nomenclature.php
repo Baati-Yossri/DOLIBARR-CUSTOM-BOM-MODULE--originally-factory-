@@ -150,9 +150,17 @@ $pdf->SetFont('helvetica', '', 9);
 $counter = 1;
 
 $is_first_other = true;
+$is_first_client = true;
 
 foreach ($final_groups as $fourn => $comps) {
     $is_client = ($client_name != '' && strtolower(trim($fourn)) == strtolower($client_name));
+    
+    if ($is_client && $is_first_client) {
+        $pdf->SetFillColor(200, 230, 200);
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(190, 8, 'FOURNIS PAR LE CLIENT', 1, 1, 'C', 1);
+        $is_first_client = false;
+    }
     
     if (!$is_client && $is_first_other && count($client_group) > 0) {
         if ($pdf->GetY() > 270) {
