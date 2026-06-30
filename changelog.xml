@@ -244,6 +244,11 @@
 	<Version Number="10.0.+2.1.1" MonthVersion="2019-09">
 		<change type='chg'>stock movement on project display</change>
 	</Version>
+	<Version Number="10.0.+2.2.0" MonthVersion="2026-06">
+		<change type='add'>Add dynamic supplier grouping in nomenclature PDF</change>
+		<change type='add'>Add has_nomenclature automatic extrafield tagging for product filtering</change>
+		<change type='fix'>Fix hardcoded paths for server migration</change>
+	</Version>
 
 	<Dolibarr minVersion="5.0.0"/>
 	<!-- Remplir le undocumented.xml ? -->
