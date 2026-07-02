@@ -518,17 +518,15 @@ if ($id || $ref) {
 				print '<th class="liste_titre" width=50px align="center">'.$langs->trans("QtyStock").'</th>'; 
 				if ($conf->stock->enabled) { 	// we display vwap titles
 					print '<th class="liste_titre" width=100px align="right">'.$langs->trans("UnitPmp").'</th>';
-					print '<th class="liste_titre" width=100px align="right">'.$langs->trans("CostPmpHT").'</th>';
+					print '<th class="liste_titre" width=140px align="center">Fournisseur</th>';
 				} else {
 					// we display price as latest purchasing unit price title
 					print '<th class="liste_titre" width=100px align="right">'.$langs->trans("FactoryUnitHA").'</th>';
-					print '<th class="liste_titre" width=100px align="right">'.$langs->trans("FactoryCostHA").'</th>';
+					print '<th class="liste_titre" width=140px align="center">Fournisseur</th>';
 				}
 				print '<th class="liste_titre" width=100px align="center">'.$langs->trans("Warehouse").'</th>';
 				print '<th class="liste_titre" width=80px align="center">'.$langs->trans("Actions").'</th>';
 				print '</tr>';
-				$pmpTot=0;
-
 				$canedit = ($user->rights->factory->creer || $user->rights->produit->creer || $user->rights->service->creer);
 
 				if (count($prods_arbo) > 0) {
@@ -586,7 +584,18 @@ if ($id || $ref) {
 							print '<td></td>';
 						
 						print '<td align="right">'.price($pmp).'</td>'; // display else vwap or else latest purchasing price
-						print '<td align="right">'.price($pmp*$value['nb']).'</td>'; // display total line
+
+						$fournisseur_name = '';
+						$sql = "SELECT s.nom FROM ".MAIN_DB_PREFIX."product_fournisseur_price as pfp";
+						$sql.= " JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = pfp.fk_soc";
+						$sql.= " WHERE pfp.fk_product = ".((int) $value['id']);
+						$sql.= " LIMIT 1";
+						$resql = $db->query($sql);
+						if ($resql && $db->num_rows($resql) > 0) {
+							$objfourn = $db->fetch_object($resql);
+							$fournisseur_name = $objfourn->nom;
+						}
+						print '<td align="center">'.dol_escape_htmltag($fournisseur_name).'</td>';
 						
 						// Warehouse
 						print '<td align="center">';
@@ -614,8 +623,6 @@ if ($id || $ref) {
 							}
 						}
 						print '</td>';
-						
-						$pmpTot=$pmpTot+$pmp*$value['nb']; // sub total calculation
 						
 						print '</tr>';
 						print "<tr style='display:none' class='detaillignecomposition".$value['id']."'>";
@@ -645,14 +652,6 @@ if ($id || $ref) {
 					print '</tr>';
 				}
 
-				if (count($prods_arbo) > 0) {
-					print '<tr class="liste_total">';
-					print '<td colspan=6 align=right >'.$langs->trans("Total").'</td>';
-					print '<td align="right" >'.price($pmpTot).'</td>';
-					print '<td></td>';
-					print '<td></td>';
-					print '</tr>';
-				}
 				print '</table>';
 				print '</form>';
 			}
