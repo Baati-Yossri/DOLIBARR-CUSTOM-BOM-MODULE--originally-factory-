@@ -518,11 +518,11 @@ if ($id || $ref) {
 				// on affiche la colonne stock même si cette fonction n'est pas active
 				print '<th class="liste_titre" width=50px align="center">'.$langs->trans("QtyStock").'</th>'; 
 				if ($conf->stock->enabled) { 	// we display vwap titles
-					print '<th class="liste_titre" width=100px align="right">'.$langs->trans("UnitPmp").'</th>';
+					print '<th class="liste_titre" width=100px align="center">'.$langs->trans("UnitPmp").'</th>';
 					print '<th class="liste_titre" width=140px align="center">Fournisseur</th>';
 				} else {
 					// we display price as latest purchasing unit price title
-					print '<th class="liste_titre" width=100px align="right">'.$langs->trans("FactoryUnitHA").'</th>';
+					print '<th class="liste_titre" width=100px align="center">'.$langs->trans("FactoryUnitHA").'</th>';
 					print '<th class="liste_titre" width=140px align="center">Fournisseur</th>';
 				}
 				print '<th class="liste_titre" width=100px align="center">'.$langs->trans("Warehouse").'</th>';
@@ -584,7 +584,7 @@ if ($id || $ref) {
 						else	// no stock management for services
 							print '<td></td>';
 						
-						print '<td align="right">'.price($pmp).'</td>'; // display else vwap or else latest purchasing price
+						print '<td align="center">'.price($pmp).'</td>'; // display else vwap or else latest purchasing price
 
 						$fournisseur_name = '';
 						$sql = "SELECT s.nom FROM ".MAIN_DB_PREFIX."product_fournisseur_price as pfp";
@@ -670,7 +670,7 @@ if ($id || $ref) {
 			print '<td class="liste_titre" width=100px align="left">'.$langs->trans("Ref").'</td>';
 			print '<td class="liste_titre" width=200px align="left">'.$langs->trans("Label").'</td>';
 			print '<td class="liste_titre" width=50px align="center">'.$langs->trans("Stock").'</td>';
-			print '<td class="liste_titre" width=100px align="right">'.$langs->trans("UnitPmp").'</td>';
+			print '<td class="liste_titre" width=100px align="center">'.$langs->trans("UnitPmp").'</td>';
 			print '<td class="liste_titre" width=100px align="right">'.$langs->trans("SellingPriceHT").'</td>';
 			print '</tr>';
 			foreach ($prodsfather as $value) {
@@ -691,7 +691,7 @@ if ($id || $ref) {
 					// no stock managment for the services
 					print '<td></td>';
 				}
-				print '<td align="right">'.price($productstatic->pmp).'</td>';
+				print '<td align="center">'.price($productstatic->pmp).'</td>';
 				print '<td align="right">'.price($productstatic->price).'</td>';
 				print '</tr>';
 			}
