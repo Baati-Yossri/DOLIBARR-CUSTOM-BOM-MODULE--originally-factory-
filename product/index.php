@@ -506,6 +506,7 @@ if ($id || $ref) {
 				print '<style>
 					table.composition-table th.liste_titre { white-space: nowrap; padding-left: 8px; padding-right: 8px; }
 					table.composition-table .composition-label { width: 35%; min-width: 260px; }
+					table.composition-table tr.composition-component-row td { border-top: 1px solid #d8d8d8; border-bottom: 1px solid #d8d8d8; }
 					table.composition-table td .select2-container { max-width: 600px !important; width: 100% !important; }
 				</style>';
 				print '<table class="border composition-table" width="100%">';
@@ -538,7 +539,7 @@ if ($id || $ref) {
 
 						$editmode = ($action == 'editline' && GETPOST('lineid', 'int') == $value['id']);
 
-						print '<tr id="line_'.$value['id'].'">';
+						print '<tr id="line_'.$value['id'].'" class="composition-component-row">';
 						print '<td>';
 						print "<a href='#line_".$value['id']."' onclick=\"$('.detaillignecomposition".$value['id']."').toggle();\" >";
 						print img_picto("", "edit_add")."</a>";
