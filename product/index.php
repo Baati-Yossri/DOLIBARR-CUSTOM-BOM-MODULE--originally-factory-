@@ -505,17 +505,17 @@ if ($id || $ref) {
 				
 				print '<style>
 					table.composition-table th.liste_titre { white-space: nowrap; padding-left: 8px; padding-right: 8px; }
-					table.composition-table td .select2-container { max-width: 350px !important; width: 100% !important; }
+					table.composition-table .composition-label { width: 35%; min-width: 260px; }
+					table.composition-table td .select2-container { max-width: 600px !important; width: 100% !important; }
 				</style>';
 				print '<table class="border composition-table" width="100%">';
 				print '<tr class="liste_titre">';
 				print '<th class="liste_titre" width=10px></th>';
 				print '<th class="liste_titre" width=100px align="left">'.$langs->trans("Ref").'</th>';
-				print '<th class="liste_titre" width=200px align="left">'.$langs->trans("Label").'</th>';
+				print '<th class="liste_titre composition-label" align="left">'.$langs->trans("Label").'</th>';
 				print '<th class="liste_titre" width=80px align="center">'.$langs->trans("QtyNeed").'</th>';
 				// on affiche la colonne stock même si cette fonction n'est pas active
 				print '<th class="liste_titre" width=50px align="center">'.$langs->trans("QtyStock").'</th>'; 
-				print '<th class="liste_titre" width=100px align="center">'.$langs->trans("QtyOrder").'</th>';
 				if ($conf->stock->enabled) { 	// we display vwap titles
 					print '<th class="liste_titre" width=100px align="right">'.$langs->trans("UnitPmp").'</th>';
 					print '<th class="liste_titre" width=100px align="right">'.$langs->trans("CostPmpHT").'</th>';
@@ -524,13 +524,9 @@ if ($id || $ref) {
 					print '<th class="liste_titre" width=100px align="right">'.$langs->trans("FactoryUnitHA").'</th>';
 					print '<th class="liste_titre" width=100px align="right">'.$langs->trans("FactoryCostHA").'</th>';
 				}
-				print '<th class="liste_titre" width=100px align="right">'.$langs->trans("FactoryUnitPriceHT").'</th>';
-				print '<th class="liste_titre" width=100px align="right">'.$langs->trans("FactorySellingPriceHT").'</th>';
-				print '<th class="liste_titre" width=100px align="right">'.$langs->trans("ProfitAmount").'</th>';
 				print '<th class="liste_titre" width=100px align="center">'.$langs->trans("Warehouse").'</th>';
 				print '<th class="liste_titre" width=80px align="center">'.$langs->trans("Actions").'</th>';
 				print '</tr>';
-				$mntTot=0;
 				$pmpTot=0;
 
 				$canedit = ($user->rights->factory->creer || $user->rights->produit->creer || $user->rights->service->creer);
@@ -556,7 +552,7 @@ if ($id || $ref) {
 						print '</td>';
 		
 						// Label
-						print '<td align="left">'.$value['label'].'</td>';
+						print '<td class="composition-label" align="left">'.$value['label'].'</td>';
 						
 						// Quantity
 						print '<td align="center">';
@@ -569,7 +565,6 @@ if ($id || $ref) {
 							print "&nbsp;G";
 						print '</td>';
 						
-						$price=$value['price'];
 						$pmp=$value['pmp'];
 		
 						if ($conf->stock->enabled) {
@@ -584,21 +579,6 @@ if ($id || $ref) {
 								}
 								$qty_stock = round($qty_stock, 5);
 								print '<td align=center>'.$factory->getUrlStock($value['id'], 1, $qty_stock).'</td>';
-								$nbcmde=0;
-								// on regarde si il n'y pas de commande fournisseur en cours
-								$sql = 'SELECT DISTINCT sum(cofd.qty) as nbCmdFourn';
-								$sql.= " FROM ".MAIN_DB_PREFIX."commande_fournisseurdet as cofd";
-								$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."commande_fournisseur as cof ON cof.rowid = cofd.fk_commande";
-								$sql.= " WHERE cof.entity = ".$conf->entity;
-								$sql.= " AND cof.fk_statut = 3";
-								$sql.= " and cofd.fk_product=".$value['id'];
-								$resql = $db->query($sql);
-								if ($resql) {
-									$objp_sub = $db->fetch_object($resql);
-									if ($objp_sub && $objp_sub->nbCmdFourn)
-										$nbcmde=$objp_sub->nbCmdFourn;
-								}
-								print '<td align=right>'.$nbcmde.'</td>';
 							} else	// no stock management for services
 								print '<td></td>';
 						}
@@ -607,9 +587,6 @@ if ($id || $ref) {
 						
 						print '<td align="right">'.price($pmp).'</td>'; // display else vwap or else latest purchasing price
 						print '<td align="right">'.price($pmp*$value['nb']).'</td>'; // display total line
-						print '<td align="right">'.price($price).'</td>';
-						print '<td align="right">'.price($price*$value['nb']).'</td>';
-						print '<td align="right">'.price(($price-$pmp)*$value['nb']).'</td>'; 
 						
 						// Warehouse
 						print '<td align="center">';
@@ -638,13 +615,12 @@ if ($id || $ref) {
 						}
 						print '</td>';
 						
-						$mntTot=$mntTot+$price*$value['nb'];
 						$pmpTot=$pmpTot+$pmp*$value['nb']; // sub total calculation
 						
 						print '</tr>';
 						print "<tr style='display:none' class='detaillignecomposition".$value['id']."'>";
 						print '<td colspan=3>'.$langs->trans("Position")." : ".$value['ordercomponent'].'</td>';
-						print '<td colspan=10>'.$langs->trans("InfoAnnexes")." : ".$value['description'].'</td>';
+						print '<td colspan=6>'.$langs->trans("InfoAnnexes")." : ".$value['description'].'</td>';
 						print '</tr>';
 					}
 				}
@@ -659,7 +635,7 @@ if ($id || $ref) {
 					print '<td align="center">';
 					print '<input type="text" name="add_qty" size="4" value="1">';
 					print '</td>';
-					print '<td colspan="7"></td>';
+					print '<td colspan="3"></td>';
 					print '<td align="center">';
 					print $formproduct->selectWarehouses(0, 'add_fk_entrepot', '', 1);
 					print '</td>';
@@ -671,11 +647,8 @@ if ($id || $ref) {
 
 				if (count($prods_arbo) > 0) {
 					print '<tr class="liste_total">';
-					print '<td colspan=7 align=right >'.$langs->trans("Total").'</td>';
+					print '<td colspan=6 align=right >'.$langs->trans("Total").'</td>';
 					print '<td align="right" >'.price($pmpTot).'</td>';
-					print '<td ></td>';
-					print '<td align="right" >'.price($mntTot).'</td>';
-					print '<td align="right" >'.price($mntTot-$pmpTot).'</td>';
 					print '<td></td>';
 					print '<td></td>';
 					print '</tr>';
